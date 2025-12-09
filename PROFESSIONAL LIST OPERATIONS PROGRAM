@@ -1,0 +1,121 @@
+
+#   FULL PROFESSIONAL LIST OPERATIONS PROGRAM
+#   Complete, Robust, Modular, Extendable
+
+
+import ast
+
+# --------------------------------
+# Safe literal converter
+# --------------------------------
+def safe_convert(value):
+    try:
+        return ast.literal_eval(value)
+    except Exception:
+        return value.strip()
+
+# --------------------------------
+# Get list with validation
+# --------------------------------
+def get_list(prompt):
+    while True:
+        raw = input(prompt).strip()
+        if raw == "":
+            print("ورودی خالی است. دوباره وارد کنید.")
+            continue
+
+        try:
+            # تبدیل امن به لیست
+            data = ast.literal_eval(raw)
+            if not isinstance(data, list):
+                raise ValueError
+
+            return [safe_convert(str(x)) for x in data]
+
+        except Exception:
+            print("ورودی معتبر نیست. مثال صحیح:  [1, 2, 'a', 5.7]")
+
+# --------------------------------
+# Element-wise operation handler
+# --------------------------------
+def element_wise_op(list1, list2, func):
+    length = min(len(list1), len(list2))
+    result = []
+    for i in range(length):
+        try:
+            result.append(func(list1[i], list2[i]))
+        except Exception:
+            result.append(f"ERROR({list1[i]}, {list2[i]})")
+    return result
+
+# --------------------------------
+# All operations dictionary
+# --------------------------------
+def sum_op(a, b): return a + b
+def sub_op(a, b): return a - b
+def mul_op(a, b): return a * b
+def div_op(a, b):
+    try:
+        return a / b
+    except Exception:
+        return "DIV_ERROR"
+
+operations = {
+    "1": ("جمع متناظر", lambda L1, L2: element_wise_op(L1, L2, sum_op)),
+    "2": ("تفریق متناظر", lambda L1, L2: element_wise_op(L1, L2, sub_op)),
+    "3": ("ضرب متناظر", lambda L1, L2: element_wise_op(L1, L2, mul_op)),
+    "4": ("تقسیم متناظر", lambda L1, L2: element_wise_op(L1, L2, div_op)),
+    "5": ("الحاق: append", lambda L1, L2: L1 + [L2]),
+    "6": ("الحاق: extend", lambda L1, L2: L1 + L2),
+    "7": ("ادغام دو لیست", lambda L1, L2: L1 + L2),
+    "8": ("عناصر مشترک", lambda L1, L2: list(set(L1) & set(L2))),
+    "9": ("عناصر غیرمشترک", lambda L1, L2: list(set(L1) ^ set(L2))),
+    "10": ("مرتب‌سازی هر دو لیست", lambda L1, L2: (sorted(L1, key=str), sorted(L2, key=str))),
+    "11": ("مقایسه عنصر به عنصر", lambda L1, L2: element_wise_op(L1, L2, lambda a,b: a == b)),
+    "12": ("فقط بخش مشترک طولی", lambda L1, L2: (L1[:min(len(L1),len(L2))], L2[:min(len(L1),len(L2))])),
+}
+
+# --------------------------------
+# Show menu
+# --------------------------------
+def show_menu():
+    print("\nلیست عملیات موجود:")
+    for key, (name, _) in operations.items():
+        print(f"{key}. {name}")
+
+# --------------------------------
+# Main Program
+# --------------------------------
+def main():
+    print("=== برنامه جامع عملیات روی لیست‌ها ===")
+
+    list1 = get_list("لیست اول را وارد کنید: ")
+    list2 = get_list("لیست دوم را وارد کنید: ")
+
+    while True:
+        show_menu()
+        choice = input("\nشماره عملیات موردنظر را وارد کنید: ").strip()
+
+        if choice not in operations:
+            print("گزینه نامعتبر است.")
+            continue
+
+        op_name, op_func = operations[choice]
+        print(f"\nعملیات انتخاب شده: {op_name}\n")
+
+        try:
+            result = op_func(list1, list2)
+            print("خروجی:", result)
+        except Exception as e:
+            print("خطا در اجرای عملیات:", e)
+
+        cont = input("\nآیا می‌خواهید عملیات دیگری انجام دهید؟ (y/n): ").lower()
+        if cont != "y":
+            break
+
+    print("\nپایان برنامه.")
+
+
+# Run
+if __name__ == "__main__":
+    main()
